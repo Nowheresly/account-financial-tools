@@ -736,6 +736,16 @@ class account_asset_asset(orm.Model):
                     lines[-1]['depreciated_value'] = depreciated_value
                     lines[-1]['amount'] = entry['fy_amount'] - fy_amount_check
 
+                    # in case the start date of the asset is before the start date of the current
+                    # calculation period, we need to remove valuation prior to the start date
+                    # of the current calculation period
+                    def diff_month(d1, d2):
+                        return (d1.year - d2.year)*12 + d1.month - d2.month
+                    nb_months = diff_month(datetime.strptime(asset.date_start, "%Y-%m-%d"),
+                                           entry['date_start'])
+
+                    fy_amount_check += nb_months * entry['period_amount']
+
             else:
                 table_i_start = 0
                 line_i_start = 0
